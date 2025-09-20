@@ -6,6 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ArrowLeft, Download, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
 
@@ -67,6 +72,17 @@ export default function InvoiceDetailPage() {
     const [invoice, setInvoice] = useState<Invoice | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Payment modal state
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [paymentForm, setPaymentForm] = useState({
+        paymentDate: new Date().toISOString().split('T')[0],
+        amount: '',
+        paymentMethod: 'CASH',
+        reference: '',
+        notes: '',
+    });
+    const [creatingPayment, setCreatingPayment] = useState(false);
+
     useEffect(() => {
         if (params.id) {
             fetchInvoice();
@@ -111,6 +127,67 @@ export default function InvoiceDetailPage() {
             }
         } catch (error) {
             console.error('Error downloading PDF:', error);
+        }
+    };
+
+    const handleCreatePayment = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!invoice) return;
+
+        if (!paymentForm.amount || parseFloat(paymentForm.amount) <= 0) {
+            alert('Please enter a valid payment amount');
+            return;
+        }
+
+        const currentBalance = parseFloat(invoice.balanceAmount);
+        const paymentAmount = parseFloat(paymentForm.amount);
+
+        if (paymentAmount > currentBalance) {
+            alert(`Payment amount cannot exceed the balance due of ₹${currentBalance.toFixed(2)}`);
+            return;
+        }
+
+        setCreatingPayment(true);
+
+        try {
+            const response = await fetch('/api/payments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    invoiceId: invoice.id,
+                    paymentDate: paymentForm.paymentDate,
+                    amount: paymentForm.amount,
+                    paymentMethod: paymentForm.paymentMethod,
+                    reference: paymentForm.reference || undefined,
+                    notes: paymentForm.notes || undefined,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Payment created successfully!');
+                setIsPaymentModalOpen(false);
+                setPaymentForm({
+                    paymentDate: new Date().toISOString().split('T')[0],
+                    amount: '',
+                    paymentMethod: 'CASH',
+                    reference: '',
+                    notes: '',
+                });
+                // Refresh invoice data to show updated payments and balance
+                fetchInvoice();
+            } else {
+                alert(`Error creating payment: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Error creating payment:', error);
+            alert('Error creating payment');
+        } finally {
+            setCreatingPayment(false);
         }
     };
 
@@ -352,10 +429,108 @@ export default function InvoiceDetailPage() {
                         <CardHeader>
                             <div className="flex justify-between items-center">
                                 <CardTitle>Payments</CardTitle>
-                                <Button size="sm" variant="outline">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Add Payment
-                                </Button>
+                                <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button size="sm" variant="outline">
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Add Payment
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Add Payment</DialogTitle>
+                                            <DialogDescription>
+                                                Record a payment for this invoice. Current balance: ₹{invoice.balanceAmount}
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <form onSubmit={handleCreatePayment}>
+                                            <div className="grid gap-4 py-4">
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="paymentDate" className="text-right">
+                                                        Date
+                                                    </Label>
+                                                    <Input
+                                                        id="paymentDate"
+                                                        type="date"
+                                                        value={paymentForm.paymentDate}
+                                                        onChange={(e) => setPaymentForm(prev => ({ ...prev, paymentDate: e.target.value }))}
+                                                        className="col-span-3"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="amount" className="text-right">
+                                                        Amount
+                                                    </Label>
+                                                    <Input
+                                                        id="amount"
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={paymentForm.amount}
+                                                        onChange={(e) => setPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
+                                                        className="col-span-3"
+                                                        placeholder="0.00"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="paymentMethod" className="text-right">
+                                                        Method
+                                                    </Label>
+                                                    <Select
+                                                        value={paymentForm.paymentMethod}
+                                                        onValueChange={(value) => setPaymentForm(prev => ({ ...prev, paymentMethod: value }))}
+                                                    >
+                                                        <SelectTrigger className="col-span-3">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="CASH">Cash</SelectItem>
+                                                            <SelectItem value="BANK">Bank Transfer</SelectItem>
+                                                            <SelectItem value="CHEQUE">Cheque</SelectItem>
+                                                            <SelectItem value="CARD">Card</SelectItem>
+                                                            <SelectItem value="DIGITAL">Digital Wallet</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="reference" className="text-right">
+                                                        Reference
+                                                    </Label>
+                                                    <Input
+                                                        id="reference"
+                                                        value={paymentForm.reference}
+                                                        onChange={(e) => setPaymentForm(prev => ({ ...prev, reference: e.target.value }))}
+                                                        className="col-span-3"
+                                                        placeholder="Transaction ID, Cheque number, etc."
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                    <Label htmlFor="notes" className="text-right">
+                                                        Notes
+                                                    </Label>
+                                                    <Textarea
+                                                        id="notes"
+                                                        value={paymentForm.notes}
+                                                        onChange={(e) => setPaymentForm(prev => ({ ...prev, notes: e.target.value }))}
+                                                        className="col-span-3"
+                                                        placeholder="Additional notes..."
+                                                        rows={3}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <DialogFooter>
+                                                <Button type="button" variant="outline" onClick={() => setIsPaymentModalOpen(false)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit" disabled={creatingPayment}>
+                                                    {creatingPayment ? 'Creating...' : 'Create Payment'}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </CardHeader>
                         <CardContent>

@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
             subTotal += parseFloat(item.quantity) * parseFloat(item.unitPrice);
             taxAmount += parseFloat(item.taxAmount || '0');
             discountAmount += parseFloat(item.discountAmount || '0');
-            totalAmount += parseFloat(item.totalAmount);
+            totalAmount += parseFloat(item.totalAmount || '0');
         }
 
         // Create vendor bill
@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
                 type: 'PURCHASE',
                 contactId: purchaseOrder.vendorId,
                 orderId: poId,
-                invoiceDate: new Date(invoiceDate).toISOString(),
-                dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+                invoiceDate: new Date(invoiceDate),
+                dueDate: dueDate ? new Date(dueDate) : null,
                 status: 'UNPAID',
                 subTotal: subTotal.toString(),
                 totalAmount: totalAmount.toString(),
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
                 currency: 'INR',
                 terms: terms || purchaseOrder.notes,
                 notes: notes,
-                createdBy: session.user.id,
+                createdBy: parseInt(session.user.id),
             })
             .returning();
 
@@ -179,11 +179,11 @@ export async function POST(request: NextRequest) {
             orderId: newBill.id,
             orderType: 'INVOICE',
             productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxAmount: item.taxAmount,
-            discountAmount: item.discountAmount,
-            totalAmount: item.totalAmount,
+            quantity: String(item.quantity),
+            unitPrice: String(item.unitPrice),
+            taxAmount: item.taxAmount ? String(item.taxAmount) : '0',
+            discountAmount: item.discountAmount ? String(item.discountAmount) : '0',
+            totalAmount: item.totalAmount ? String(item.totalAmount) : '0',
         }));
 
         await db.insert(orderItems).values(billItemsData);
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
                 .update(purchaseOrders)
                 .set({
                     status: 'RECEIVED',
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: new Date(),
                 })
                 .where(eq(purchaseOrders.id, poId));
         }

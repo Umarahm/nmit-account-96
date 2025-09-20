@@ -74,8 +74,8 @@ export async function GET(request: NextRequest) {
             pagination: {
                 page,
                 limit,
-                total: totalCount[0].count,
-                pages: Math.ceil(totalCount[0].count / limit)
+                total: Number(totalCount[0].count),
+                pages: Math.ceil(Number(totalCount[0].count) / limit)
             }
         });
 
@@ -91,12 +91,14 @@ export async function GET(request: NextRequest) {
 // POST /api/invoices - Create new invoice
 export async function POST(request: NextRequest) {
     try {
+        console.log('Starting invoice creation...');
         const session = await getServerSession(authOptions);
         if (!session?.user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const body = await request.json();
+        console.log('Request body:', body);
         const {
             type,
             contactId,
@@ -113,6 +115,8 @@ export async function POST(request: NextRequest) {
             notes
         } = body;
 
+        console.log('Parsed data:', { type, contactId, invoiceDate, dueDate, items: items?.length });
+
         // Validation
         if (!type || !contactId || !invoiceDate || !items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json(
@@ -120,6 +124,29 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        // Validate date fields
+        console.log('Validating dates...');
+        const invoiceDateObj = new Date(invoiceDate);
+        if (isNaN(invoiceDateObj.getTime())) {
+            return NextResponse.json(
+                { error: "Invalid invoice date format" },
+                { status: 400 }
+            );
+        }
+
+        let dueDateObj = null;
+        if (dueDate) {
+            dueDateObj = new Date(dueDate);
+            if (isNaN(dueDateObj.getTime())) {
+                return NextResponse.json(
+                    { error: "Invalid due date format" },
+                    { status: 400 }
+                );
+            }
+        }
+
+        console.log('Date validation passed:', { invoiceDate: invoiceDateObj.toISOString(), dueDate: dueDateObj?.toISOString() });
 
         if (!['PURCHASE', 'SALES'].includes(type)) {
             return NextResponse.json(
@@ -129,6 +156,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate contact exists and has correct type
+        console.log('Validating contact...', { contactId, type });
         const contact = await db
             .select()
             .from(contacts)
@@ -141,6 +169,7 @@ export async function POST(request: NextRequest) {
             ))
             .limit(1);
 
+        console.log('Contact query result:', contact);
         if (contact.length === 0) {
             return NextResponse.json(
                 { error: `Invalid ${type === 'PURCHASE' ? 'vendor' : 'customer'} ID` },
@@ -194,14 +223,18 @@ export async function POST(request: NextRequest) {
         let calculatedDiscountAmount = discountAmount || 0;
         let calculatedTotalAmount = totalAmount || 0;
 
+        console.log('Checking if amounts need calculation...', { subTotal, taxAmount, discountAmount, totalAmount });
         if (!subTotal || !taxAmount || !discountAmount || !totalAmount) {
+            console.log('Calculating amounts from items...');
             for (const item of items) {
+                console.log('Processing item:', item);
                 const product = await db
                     .select()
                     .from(products)
                     .where(eq(products.id, item.productId))
                     .limit(1);
 
+                console.log('Product query result:', product);
                 if (product.length === 0) {
                     return NextResponse.json(
                         { error: `Product with ID ${item.productId} not found` },
@@ -221,9 +254,46 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const balanceAmount = calculatedTotalAmount - (paidAmount || 0);
+        console.log('Calculated amounts:', {
+            calculatedSubTotal,
+            calculatedTaxAmount,
+            calculatedDiscountAmount,
+            calculatedTotalAmount,
+            types: {
+                subTotal: typeof calculatedSubTotal,
+                taxAmount: typeof calculatedTaxAmount,
+                discountAmount: typeof calculatedDiscountAmount,
+                totalAmount: typeof calculatedTotalAmount
+            }
+        });
+
+        const balanceAmount = calculatedTotalAmount;
 
         // Create invoice
+        console.log('About to create invoice. Date objects:', {
+            invoiceDateObj,
+            dueDateObj,
+            invoiceDateType: typeof invoiceDateObj,
+            dueDateType: typeof dueDateObj
+        });
+
+        // Use Date objects directly instead of ISO strings for Drizzle timestamp fields
+        console.log('Using Date objects for database insert:', {
+            invoiceDate: invoiceDateObj,
+            dueDate: dueDateObj
+        });
+
+        console.log('Creating invoice with data:', {
+            invoiceNumber,
+            type,
+            contactId,
+            invoiceDate: invoiceDateObj,
+            dueDate: dueDateObj,
+            totalAmount: calculatedTotalAmount,
+            taxAmount: calculatedTaxAmount,
+            discountAmount: calculatedDiscountAmount
+        });
+
         const [newInvoice] = await db
             .insert(invoices)
             .values({
@@ -231,35 +301,38 @@ export async function POST(request: NextRequest) {
                 type,
                 contactId,
                 orderId: orderId || null,
-                invoiceDate: new Date(invoiceDate).toISOString(),
-                dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+                invoiceDate: invoiceDateObj,
+                dueDate: dueDateObj,
                 status: 'UNPAID',
-                subTotal: calculatedSubTotal.toString(),
-                totalAmount: calculatedTotalAmount.toString(),
-                taxAmount: calculatedTaxAmount.toString(),
-                discountAmount: calculatedDiscountAmount.toString(),
+                subTotal: String(calculatedSubTotal),
+                totalAmount: String(calculatedTotalAmount),
+                taxAmount: String(calculatedTaxAmount),
+                discountAmount: String(calculatedDiscountAmount),
                 paidAmount: '0',
-                balanceAmount: balanceAmount.toString(),
-                currency,
-                terms,
+                balanceAmount: String(calculatedTotalAmount),
+                currency: 'INR',
                 notes,
-                createdBy: session.user.id,
+                createdBy: parseInt(session.user.id),
             })
             .returning();
+
+        console.log('Invoice created:', newInvoice);
 
         // Create invoice items (using orderItems table with orderType as INVOICE)
         const invoiceItemsData = items.map(item => ({
             orderId: newInvoice.id,
             orderType: 'INVOICE',
             productId: item.productId,
-            quantity: item.quantity.toString(),
-            unitPrice: item.unitPrice.toString(),
-            taxAmount: item.taxAmount?.toString() || '0',
-            discountAmount: item.discountAmount?.toString() || '0',
-            totalAmount: ((item.quantity * item.unitPrice) + (item.taxAmount || 0) - (item.discountAmount || 0)).toString(),
+            quantity: String(item.quantity),
+            unitPrice: String(item.unitPrice),
+            taxAmount: item.taxAmount ? String(item.taxAmount) : '0',
+            discountAmount: item.discountAmount ? String(item.discountAmount) : '0',
+            totalAmount: String((item.quantity * item.unitPrice) + (item.taxAmount || 0) - (item.discountAmount || 0)),
         }));
 
+        console.log('Creating invoice items:', invoiceItemsData);
         await db.insert(orderItems).values(invoiceItemsData);
+        console.log('Invoice items created successfully');
 
         // Fetch the complete invoice with contact details
         const [completeInvoice] = await db
@@ -296,8 +369,9 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error("Error creating invoice:", error);
+        console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
         return NextResponse.json(
-            { error: "Internal server error" },
+            { error: "Internal server error", details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
     }
