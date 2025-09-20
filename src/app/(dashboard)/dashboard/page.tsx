@@ -154,7 +154,13 @@ export default function DashboardPage() {
                                 title="Create Sale"
                                 description="New sale order"
                                 icon={<ShoppingCart className="h-6 w-6" />}
-                                href="/dashboard/sales/new"
+                                href="/dashboard/sales-orders/new"
+                            />
+                            <QuickAction
+                                title="Create Purchase"
+                                description="New purchase order"
+                                icon={<CreditCard className="h-6 w-6" />}
+                                href="/dashboard/purchase-orders/new"
                             />
                             <QuickAction
                                 title="View Reports"
