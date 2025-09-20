@@ -160,4 +160,71 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Responsive typography */
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Improved mobile touch targets */
+  @media (max-width: 768px) {
+    button, 
+    [role="button"], 
+    input[type="submit"], 
+    input[type="button"] {
+      @apply min-h-[44px];
+    }
+  }
+
+  /* Better focus visibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  /* Smooth transitions for interactive elements */
+  .transition-colors {
+    transition-property: color, background-color, border-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Improve print styles */
+  @media print {
+    * {
+      @apply text-black bg-white;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

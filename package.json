@@ -10,7 +10,12 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:setup": "tsx scripts/setup-db.ts setup",
+    "db:seed": "tsx scripts/setup-db.ts seed",
+    "db:reset": "tsx scripts/setup-db.ts reset --force",
+    "db:fresh": "drizzle-kit push && tsx scripts/setup-db.ts seed",
+    "db:check": "tsx scripts/check-db.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -44,6 +49,7 @@
     "eslint-config-next": "15.5.3",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5"
   }

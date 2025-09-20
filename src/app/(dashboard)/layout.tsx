@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { Navigation } from "@/components/layout";
 import {
     Home,
     Users,
@@ -39,44 +40,6 @@ export default function DashboardLayout({
         signOut({ callbackUrl: "/" });
     };
 
-    const navigationItems = [
-        {
-            title: "Dashboard",
-            url: "/dashboard",
-            icon: Home,
-        },
-        {
-            title: "Contacts",
-            url: "/dashboard/contacts",
-            icon: Users,
-        },
-        {
-            title: "Products",
-            url: "/dashboard/products",
-            icon: Package,
-        },
-        {
-            title: "Sales",
-            url: "/dashboard/sales",
-            icon: ShoppingCart,
-        },
-        {
-            title: "Invoices",
-            url: "/dashboard/invoices",
-            icon: FileText,
-        },
-        {
-            title: "Reports",
-            url: "/dashboard/reports",
-            icon: BarChart3,
-        },
-        {
-            title: "Settings",
-            url: "/dashboard/settings",
-            icon: Settings,
-        },
-    ];
-
     return (
         <SidebarProvider>
             <div className="min-h-screen bg-background flex w-full">
@@ -91,23 +54,7 @@ export default function DashboardLayout({
                     </SidebarHeader>
 
                     <SidebarContent>
-                        <SidebarGroup>
-                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-                            <SidebarGroupContent>
-                                <SidebarMenu>
-                                    {navigationItems.map((item) => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild>
-                                                <a href={item.url}>
-                                                    <item.icon className="h-4 w-4" />
-                                                    <span>{item.title}</span>
-                                                </a>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
-                                </SidebarMenu>
-                            </SidebarGroupContent>
-                        </SidebarGroup>
+                        <Navigation />
                     </SidebarContent>
 
                     <SidebarFooter className="border-t">
@@ -125,18 +72,16 @@ export default function DashboardLayout({
                     <SidebarRail />
                 </Sidebar>
 
-                <SidebarInset>
-                    <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b bg-background px-4">
+                <SidebarInset className="flex flex-col min-h-screen">
+                    <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex-1" />
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">Dashboard</span>
                         </div>
                     </header>
-                    <main className="flex-1">
-                        <div className="p-6">
-                            {children}
-                        </div>
+                    <main className="flex-1 p-6">
+                        {children}
                     </main>
                 </SidebarInset>
             </div>
