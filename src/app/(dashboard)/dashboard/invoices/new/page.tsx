@@ -51,6 +51,13 @@ export default function NewInvoicePage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // Payment fields
+    const [recordPayment, setRecordPayment] = useState(false);
+    const [paymentAmount, setPaymentAmount] = useState<string>('');
+    const [paymentMethod, setPaymentMethod] = useState<string>('CASH');
+    const [paymentReference, setPaymentReference] = useState<string>('');
+    const [paymentNotes, setPaymentNotes] = useState<string>('');
+
     useEffect(() => {
         fetchContacts();
         fetchProducts();
@@ -96,21 +103,6 @@ export default function NewInvoicePage() {
         setItems([...items, newItem]);
     };
 
-    const updateItem = (id: string, field: keyof InvoiceItem, value: number) => {
-        setItems(items.map(item => {
-            if (item.id === id) {
-                const updatedItem = { ...item, [field]: value };
-
-                // Recalculate totals
-                if (field === 'quantity' || field === 'unitPrice' || field === 'taxAmount' || field === 'discountAmount') {
-                    updatedItem.totalAmount = (updatedItem.quantity * updatedItem.unitPrice) + updatedItem.taxAmount - updatedItem.discountAmount;
-                }
-
-                return updatedItem;
-            }
-            return item;
-        }));
-    };
 
     const removeItem = (id: string) => {
         setItems(items.filter(item => item.id !== id));
@@ -123,6 +115,16 @@ export default function NewInvoicePage() {
         return type === 'PURCHASE'
             ? parseFloat(product.purchasePrice || '0')
             : parseFloat(product.salesPrice || '0');
+    };
+
+    const getProductTaxPercentage = (productId: number) => {
+        const product = products.find(p => p.id === productId);
+        return product ? parseFloat(product.taxPercentage || '0') : 0;
+    };
+
+    const getProductName = (productId: number) => {
+        const product = products.find(p => p.id === productId);
+        return product ? product.name : '';
     };
 
     const calculateTotals = () => {
@@ -139,6 +141,13 @@ export default function NewInvoicePage() {
 
         if (!contactId || items.length === 0) {
             alert('Please select a contact and add at least one item');
+            return;
+        }
+
+        // Check that all items have valid products selected
+        const invalidItems = items.filter(item => item.productId === 0);
+        if (invalidItems.length > 0) {
+            alert('Please select a product for all items before submitting');
             return;
         }
 
@@ -177,6 +186,35 @@ export default function NewInvoicePage() {
             const data = await response.json();
 
             if (response.ok) {
+                // Create payment if requested
+                if (recordPayment && paymentAmount) {
+                    try {
+                        const paymentResponse = await fetch('/api/payments', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                invoiceId: data.invoice.id,
+                                paymentDate: invoiceDate,
+                                amount: paymentAmount,
+                                paymentMethod,
+                                reference: paymentReference || undefined,
+                                notes: paymentNotes || undefined,
+                            }),
+                        });
+
+                        if (!paymentResponse.ok) {
+                            const paymentData = await paymentResponse.json();
+                            console.error('Error creating payment:', paymentData.error);
+                            // Don't fail the invoice creation, just log the error
+                        }
+                    } catch (paymentError) {
+                        console.error('Error creating payment:', paymentError);
+                        // Don't fail the invoice creation
+                    }
+                }
+
                 alert(`${type === 'PURCHASE' ? 'Vendor bill' : 'Customer invoice'} created successfully!`);
                 // Redirect to invoice detail page
                 window.location.href = `/dashboard/invoices/${data.invoice.id}`;
@@ -315,11 +353,26 @@ export default function NewInvoicePage() {
                                                     <div className="md:col-span-2 space-y-2">
                                                         <Label>Product</Label>
                                                         <Select
-                                                            value={item.productId.toString()}
+                                                            key={`product-select-${item.id}`}
+                                                            value={item.productId === 0 ? '' : item.productId.toString()}
                                                             onValueChange={(value) => {
                                                                 const productId = parseInt(value);
-                                                                updateItem(item.id, 'productId', productId);
-                                                                updateItem(item.id, 'unitPrice', getProductPrice(productId));
+                                                                const unitPrice = getProductPrice(productId);
+                                                                const taxPercentage = getProductTaxPercentage(productId);
+
+                                                                setItems(prevItems =>
+                                                                    prevItems.map(prevItem =>
+                                                                        prevItem.id === item.id
+                                                                            ? {
+                                                                                ...prevItem,
+                                                                                productId,
+                                                                                unitPrice,
+                                                                                taxAmount: taxPercentage, // Store tax percentage, not calculated amount
+                                                                                totalAmount: (prevItem.quantity * unitPrice) + ((prevItem.quantity * unitPrice * taxPercentage) / 100) - prevItem.discountAmount
+                                                                            }
+                                                                            : prevItem
+                                                                    )
+                                                                );
                                                             }}
                                                         >
                                                             <SelectTrigger>
@@ -341,7 +394,20 @@ export default function NewInvoicePage() {
                                                             min="0"
                                                             step="0.01"
                                                             value={item.quantity}
-                                                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                const quantity = parseFloat(e.target.value) || 0;
+                                                                setItems(prevItems =>
+                                                                    prevItems.map(prevItem =>
+                                                                        prevItem.id === item.id
+                                                                            ? {
+                                                                                ...prevItem,
+                                                                                quantity,
+                                                                                totalAmount: (quantity * prevItem.unitPrice) + ((quantity * prevItem.unitPrice * prevItem.taxAmount) / 100) - prevItem.discountAmount
+                                                                            }
+                                                                            : prevItem
+                                                                    )
+                                                                );
+                                                            }}
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -351,17 +417,43 @@ export default function NewInvoicePage() {
                                                             min="0"
                                                             step="0.01"
                                                             value={item.unitPrice}
-                                                            onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                const unitPrice = parseFloat(e.target.value) || 0;
+                                                                setItems(prevItems =>
+                                                                    prevItems.map(prevItem =>
+                                                                        prevItem.id === item.id
+                                                                            ? {
+                                                                                ...prevItem,
+                                                                                unitPrice,
+                                                                                totalAmount: (prevItem.quantity * unitPrice) + ((prevItem.quantity * unitPrice * prevItem.taxAmount) / 100) - prevItem.discountAmount
+                                                                            }
+                                                                            : prevItem
+                                                                    )
+                                                                );
+                                                            }}
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label>Tax Amount</Label>
+                                                        <Label>Tax (%)</Label>
                                                         <Input
                                                             type="number"
                                                             min="0"
                                                             step="0.01"
                                                             value={item.taxAmount}
-                                                            onChange={(e) => updateItem(item.id, 'taxAmount', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                const taxPercentage = parseFloat(e.target.value) || 0;
+                                                                setItems(prevItems =>
+                                                                    prevItems.map(prevItem =>
+                                                                        prevItem.id === item.id
+                                                                            ? {
+                                                                                ...prevItem,
+                                                                                taxAmount: taxPercentage,
+                                                                                totalAmount: (prevItem.quantity * prevItem.unitPrice) + ((prevItem.quantity * prevItem.unitPrice * taxPercentage) / 100) - prevItem.discountAmount
+                                                                            }
+                                                                            : prevItem
+                                                                    )
+                                                                );
+                                                            }}
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -371,7 +463,20 @@ export default function NewInvoicePage() {
                                                             min="0"
                                                             step="0.01"
                                                             value={item.discountAmount}
-                                                            onChange={(e) => updateItem(item.id, 'discountAmount', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => {
+                                                                const discountAmount = parseFloat(e.target.value) || 0;
+                                                                setItems(prevItems =>
+                                                                    prevItems.map(prevItem =>
+                                                                        prevItem.id === item.id
+                                                                            ? {
+                                                                                ...prevItem,
+                                                                                discountAmount,
+                                                                                totalAmount: (prevItem.quantity * prevItem.unitPrice) + ((prevItem.quantity * prevItem.unitPrice * prevItem.taxAmount) / 100) - discountAmount
+                                                                            }
+                                                                            : prevItem
+                                                                    )
+                                                                );
+                                                            }}
                                                         />
                                                     </div>
                                                 </div>
@@ -419,6 +524,81 @@ export default function NewInvoicePage() {
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Payment Information */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Payment Information</CardTitle>
+                                <CardDescription>
+                                    Optionally record an initial payment for this {type === 'PURCHASE' ? 'bill' : 'invoice'}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        id="recordPayment"
+                                        checked={recordPayment}
+                                        onChange={(e) => setRecordPayment(e.target.checked)}
+                                        className="rounded"
+                                    />
+                                    <Label htmlFor="recordPayment">Record a payment for this invoice</Label>
+                                </div>
+
+                                {recordPayment && (
+                                    <div className="space-y-4 pl-6 border-l-2 border-muted">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="paymentAmount">Payment Amount</Label>
+                                                <Input
+                                                    id="paymentAmount"
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={paymentAmount}
+                                                    onChange={(e) => setPaymentAmount(e.target.value)}
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="paymentMethod">Payment Method</Label>
+                                                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="CASH">Cash</SelectItem>
+                                                        <SelectItem value="BANK">Bank Transfer</SelectItem>
+                                                        <SelectItem value="CHEQUE">Cheque</SelectItem>
+                                                        <SelectItem value="CARD">Card</SelectItem>
+                                                        <SelectItem value="DIGITAL">Digital Wallet</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="paymentReference">Reference (Optional)</Label>
+                                            <Input
+                                                id="paymentReference"
+                                                value={paymentReference}
+                                                onChange={(e) => setPaymentReference(e.target.value)}
+                                                placeholder="Transaction ID, Cheque number, etc."
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="paymentNotes">Payment Notes (Optional)</Label>
+                                            <Textarea
+                                                id="paymentNotes"
+                                                value={paymentNotes}
+                                                onChange={(e) => setPaymentNotes(e.target.value)}
+                                                placeholder="Additional payment notes..."
+                                                rows={2}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* Summary Sidebar */}
@@ -449,7 +629,7 @@ export default function NewInvoicePage() {
                         </Card>
 
                         <div className="flex gap-2">
-                            <Button type="submit" disabled={loading || items.length === 0}>
+                            <Button type="submit" disabled={loading || items.length === 0 || items.some(item => item.productId === 0)}>
                                 {loading ? 'Creating...' : `Create ${type === 'PURCHASE' ? 'Bill' : 'Invoice'}`}
                             </Button>
                             <Button type="button" variant="outline" asChild>

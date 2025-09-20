@@ -330,11 +330,11 @@ export default function NewPurchaseOrderPage() {
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {loadingData ? (
-                                                            <SelectItem value="" disabled>
+                                                            <SelectItem value="loading" disabled>
                                                                 Loading products...
                                                             </SelectItem>
                                                         ) : products.length === 0 ? (
-                                                            <SelectItem value="" disabled>
+                                                            <SelectItem value="no-products" disabled>
                                                                 No products available
                                                             </SelectItem>
                                                         ) : (

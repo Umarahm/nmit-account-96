@@ -75,6 +75,16 @@ const navigationItems = [
         description: "Financial transactions",
     },
     {
+        title: "Payments",
+        href: "/dashboard/payments",
+        icon: Receipt,
+        description: "Payment management",
+        children: [
+            { title: "All Payments", href: "/dashboard/payments" },
+            { title: "Payment Methods", href: "/dashboard/payment-methods" },
+        ],
+    },
+    {
         title: "Reports",
         href: "/dashboard/reports",
         icon: BarChart3,

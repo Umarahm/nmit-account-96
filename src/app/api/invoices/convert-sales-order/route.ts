@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
             subTotal += parseFloat(item.quantity) * parseFloat(item.unitPrice);
             taxAmount += parseFloat(item.taxAmount || '0');
             discountAmount += parseFloat(item.discountAmount || '0');
-            totalAmount += parseFloat(item.totalAmount);
+            totalAmount += parseFloat(item.totalAmount || '0');
         }
 
         // Create customer invoice
@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
                 type: 'SALES',
                 contactId: salesOrder.customerId,
                 orderId: soId,
-                invoiceDate: new Date(invoiceDate).toISOString(),
-                dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+                invoiceDate: new Date(invoiceDate),
+                dueDate: dueDate ? new Date(dueDate) : null,
                 status: 'UNPAID',
                 subTotal: subTotal.toString(),
                 totalAmount: totalAmount.toString(),
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
                 currency: 'INR',
                 terms: terms || salesOrder.notes,
                 notes: notes,
-                createdBy: session.user.id,
+                createdBy: parseInt(session.user.id),
             })
             .returning();
 
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
                 .update(salesOrders)
                 .set({
                     status: 'DELIVERED',
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: new Date(),
                 })
                 .where(eq(salesOrders.id, soId));
         }

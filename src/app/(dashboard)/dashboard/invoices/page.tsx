@@ -27,8 +27,8 @@ export default function InvoicesPage() {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState({
-        type: '',
-        status: '',
+        type: 'ALL',
+        status: 'ALL',
         search: ''
     });
 
@@ -40,8 +40,8 @@ export default function InvoicesPage() {
         try {
             setLoading(true);
             const params = new URLSearchParams();
-            if (filter.type) params.append('type', filter.type);
-            if (filter.status) params.append('status', filter.status);
+            if (filter.type && filter.type !== 'ALL') params.append('type', filter.type);
+            if (filter.status && filter.status !== 'ALL') params.append('status', filter.status);
 
             const response = await fetch(`/api/invoices?${params.toString()}`);
             const data = await response.json();
@@ -174,7 +174,7 @@ export default function InvoicesPage() {
                                     <SelectValue placeholder="All Types" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Types</SelectItem>
+                                    <SelectItem value="ALL">All Types</SelectItem>
                                     <SelectItem value="SALES">Sales Invoices</SelectItem>
                                     <SelectItem value="PURCHASE">Purchase Bills</SelectItem>
                                 </SelectContent>
@@ -190,7 +190,7 @@ export default function InvoicesPage() {
                                     <SelectValue placeholder="All Statuses" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Statuses</SelectItem>
+                                    <SelectItem value="ALL">All Statuses</SelectItem>
                                     <SelectItem value="UNPAID">Unpaid</SelectItem>
                                     <SelectItem value="PAID">Paid</SelectItem>
                                     <SelectItem value="PARTIAL">Partial</SelectItem>

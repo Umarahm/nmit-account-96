@@ -117,7 +117,7 @@ const navigationItems: NavigationItem[] = [
     children: [
       { title: "Financial Reports", href: "/dashboard/reports/financial", icon: TrendingUp },
       { title: "Balance Sheet", href: "/dashboard/reports/balance-sheet", icon: Calculator },
-      { title: "P&L Statement", href: "/dashboard/reports/pnl", icon: BarChart3 },
+      { title: "P&L Statement", href: "/dashboard/reports/profit-loss", icon: BarChart3 },
       { title: "Stock Report", href: "/dashboard/reports/stock", icon: Package },
     ],
   },
