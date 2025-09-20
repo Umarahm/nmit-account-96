@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useDataRefresh } from '@/contexts/DataContext';
 
 interface Invoice {
     id: number;
@@ -22,6 +23,7 @@ interface Invoice {
 
 export default function NewPaymentPage() {
     const router = useRouter();
+    const refreshDashboard = useDataRefresh();
     const [loading, setLoading] = useState(false);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -116,6 +118,7 @@ export default function NewPaymentPage() {
 
             if (response.ok) {
                 alert('Payment created successfully!');
+                refreshDashboard(); // Refresh dashboard data
                 router.push('/dashboard/payments');
             } else {
                 alert(`Error creating payment: ${data.error}`);

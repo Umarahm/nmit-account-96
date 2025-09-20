@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
@@ -17,7 +16,8 @@ export default function SignUpPage() {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "ACCOUNTANT" as "ADMIN" | "ACCOUNTANT" | "CONTACT",
+        // Role is fixed as CONTACT for public signup
+        role: "CONTACT" as const,
     });
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -113,18 +113,19 @@ export default function SignUpPage() {
                             />
                         </div>
 
+                        {/* Role is fixed as Contact for public signup */}
                         <div className="space-y-2">
-                            <Label htmlFor="role">Role</Label>
-                            <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select your role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ACCOUNTANT">Accountant</SelectItem>
-                                    <SelectItem value="CONTACT">Contact</SelectItem>
-                                    <SelectItem value="ADMIN">Administrator</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label>Account Type</Label>
+                            <div className="p-3 bg-gray-50 rounded-md border">
+                                <div className="flex items-center space-x-2">
+                                    <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                                    <span className="text-sm font-medium">Contact Account</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    You're signing up as a Contact. This gives you access to view your invoices and manage your profile.
+                                    Only administrators can assign other roles (Accountant/Admin).
+                                </p>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

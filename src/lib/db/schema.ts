@@ -7,7 +7,7 @@ export const users = pgTable('users', {
     email: varchar('email', { length: 255 }).unique().notNull(),
     name: varchar('name', { length: 255 }),
     password: text('password'),
-    role: varchar('role', { length: 50 }).default('ACCOUNTANT').notNull(), // ADMIN, ACCOUNTANT, CONTACT
+    role: varchar('role', { length: 50 }).default('CONTACT').notNull(), // ADMIN, ACCOUNTANT, CONTACT
     profileImage: text('profile_image'),
     lastLoginAt: timestamp('last_login_at'),
     emailVerifiedAt: timestamp('email_verified_at'),

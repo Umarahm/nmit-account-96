@@ -13,6 +13,7 @@ import { DashboardPageLayout } from "@/components/layout";
 import { Plus, Minus, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { useDataRefresh } from "@/contexts/DataContext";
 
 interface Contact {
     id: number;
@@ -34,6 +35,7 @@ interface OrderItem {
     productName: string;
     quantity: number;
     unitPrice: number;
+    taxPercentage: number;
     taxAmount: number;
     discountAmount: number;
     totalAmount: number;
@@ -42,6 +44,7 @@ interface OrderItem {
 export default function NewSalesOrderPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const refreshDashboard = useDataRefresh();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -64,21 +67,29 @@ export default function NewSalesOrderPage() {
         const fetchData = async () => {
             try {
                 setLoadingData(true);
+                console.log('Fetching data...');
+                
                 // Fetch customers
                 const customersResponse = await fetch('/api/contacts?type=CUSTOMER');
                 if (customersResponse.ok) {
                     const customersData = await customersResponse.json();
+                    console.log('Fetched customers:', customersData);
                     setCustomers(customersData.contacts || []);
+                } else {
+                    console.error('Failed to fetch customers:', customersResponse.status);
                 }
 
                 // Fetch products
-                const productsResponse = await fetch('/api/products');
+                const productsResponse = await fetch('/api/products?limit=100');
                 if (productsResponse.ok) {
                     const productsData = await productsResponse.json();
-                    console.log('Fetched products:', productsData.products);
+                    console.log('Fetched products response:', productsData);
+                    console.log('Products array:', productsData.products);
                     setProducts(productsData.products || []);
                 } else {
                     console.error('Failed to fetch products:', productsResponse.status);
+                    const errorData = await productsResponse.text();
+                    console.error('Products error response:', errorData);
                 }
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -104,6 +115,7 @@ export default function NewSalesOrderPage() {
             productName: '',
             quantity: 1,
             unitPrice: 0,
+            taxPercentage: 0,
             taxAmount: 0,
             discountAmount: 0,
             totalAmount: 0
@@ -121,9 +133,12 @@ export default function NewSalesOrderPage() {
         // Recalculate item total
         const item = newItems[index];
         const subtotal = item.quantity * item.unitPrice;
-        const taxAmount = (subtotal * parseFloat(item.taxAmount.toString())) / 100;
+        const calculatedTaxAmount = (subtotal * item.taxPercentage) / 100;
         const discountAmount = parseFloat(item.discountAmount.toString());
-        item.totalAmount = subtotal + taxAmount - discountAmount;
+        
+        // Update the calculated tax amount
+        newItems[index].taxAmount = calculatedTaxAmount;
+        newItems[index].totalAmount = subtotal + calculatedTaxAmount - discountAmount;
 
         setItems(newItems);
     };
@@ -131,52 +146,100 @@ export default function NewSalesOrderPage() {
     const handleProductChange = (index: number, productId: number) => {
         const product = products.find(p => p.id === productId);
         if (product) {
-            updateItem(index, 'productId', productId);
-            updateItem(index, 'productName', product.name);
-            updateItem(index, 'unitPrice', parseFloat(product.salesPrice || '0'));
-            updateItem(index, 'taxAmount', parseFloat(product.taxPercentage || '0'));
+            console.log('Product found:', product);
+            console.log('Sales price type:', typeof product.salesPrice, 'value:', product.salesPrice);
+            console.log('Tax percentage type:', typeof product.taxPercentage, 'value:', product.taxPercentage);
+            
+            const newItems = [...items];
+            const unitPrice = product.salesPrice ? parseFloat(product.salesPrice.toString()) : 0;
+            const taxPercentage = product.taxPercentage ? parseFloat(product.taxPercentage.toString()) : 0;
+            
+            newItems[index] = {
+                ...newItems[index],
+                productId: productId,
+                productName: product.name,
+                unitPrice: unitPrice,
+                taxPercentage: taxPercentage
+            };
+            
+            // Recalculate totals
+            const item = newItems[index];
+            const subtotal = item.quantity * item.unitPrice;
+            const calculatedTaxAmount = (subtotal * item.taxPercentage) / 100;
+            const discountAmount = item.discountAmount;
+            
+            newItems[index].taxAmount = calculatedTaxAmount;
+            newItems[index].totalAmount = subtotal + calculatedTaxAmount - discountAmount;
+            
+            setItems(newItems);
+            console.log('Updated item:', newItems[index]);
+        } else {
+            console.log('Product not found for ID:', productId);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        console.log('Form submitted with:', { customerId, items });
+
         if (!customerId || items.length === 0) {
+            console.log('Validation failed:', { customerId, itemsLength: items.length });
             setError('Please select a customer and add at least one item');
             return;
+        }
+
+        // Validate items
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (!item.productId || item.quantity <= 0 || item.unitPrice <= 0) {
+                console.log('Item validation failed:', item);
+                setError(`Item ${i + 1} is incomplete. Please check product, quantity, and unit price.`);
+                return;
+            }
         }
 
         setLoading(true);
         setError(null);
 
         try {
+            const requestData = {
+                customerId: parseInt(customerId),
+                orderDate,
+                notes,
+                items: items.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    taxAmount: item.taxAmount,
+                    discountAmount: item.discountAmount
+                }))
+            };
+            
+            console.log('Sending request:', requestData);
+
             const response = await fetch('/api/sales-orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    customerId: parseInt(customerId),
-                    orderDate,
-                    notes,
-                    items: items.map(item => ({
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        taxAmount: item.taxAmount,
-                        discountAmount: item.discountAmount
-                    }))
-                }),
+                body: JSON.stringify(requestData),
             });
 
+            console.log('Response status:', response.status);
+            
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('API Error:', errorData);
                 throw new Error(errorData.error || 'Failed to create sales order');
             }
 
             const data = await response.json();
+            console.log('Success response:', data);
+            refreshDashboard(); // Refresh dashboard data
             router.push(`/dashboard/sales-orders/${data.order.id}`);
         } catch (err) {
+            console.error('Submit error:', err);
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
             setLoading(false);
@@ -385,7 +448,7 @@ export default function NewSalesOrderPage() {
                                         <div className="text-right">
                                             <p className="text-sm text-muted-foreground">
                                                 Subtotal: ₹{(item.quantity * item.unitPrice).toFixed(2)} |
-                                                Tax: ₹{item.taxAmount.toFixed(2)} |
+                                                Tax ({item.taxPercentage}%): ₹{item.taxAmount.toFixed(2)} |
                                                 <span className="font-medium"> Total: ₹{item.totalAmount.toFixed(2)}</span>
                                             </p>
                                         </div>

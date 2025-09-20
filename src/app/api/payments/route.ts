@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { payments, invoices } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, like } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
             const [lastPayment] = await db
                 .select({ paymentNumber: payments.paymentNumber })
                 .from(payments)
-                .where(payments.paymentNumber.like(`${currentYear}-%`))
+                .where(like(payments.paymentNumber, `${currentYear}-%`))
                 .orderBy(desc(payments.paymentNumber))
                 .limit(1);
 

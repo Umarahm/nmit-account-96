@@ -6,7 +6,8 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
     try {
-        const { name, email, password, role } = await request.json();
+        const { name, email, password } = await request.json();
+        // Note: role is not accepted from public signup - always CONTACT
 
         // Validation
         if (!name || !email || !password) {
@@ -40,14 +41,14 @@ export async function POST(request: NextRequest) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Create user
+        // Create user with CONTACT role (public signup always creates CONTACT users)
         const newUser = await db
             .insert(users)
             .values({
                 name,
                 email,
                 password: hashedPassword,
-                role: role || "ACCOUNTANT",
+                role: "CONTACT", // Fixed role for public signup
                 isActive: true,
             })
             .returning();
