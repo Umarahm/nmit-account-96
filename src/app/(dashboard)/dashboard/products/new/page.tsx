@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { HSNSearch } from "@/components/ui/hsn-search";
 import { ArrowLeft, Save, Package } from "lucide-react";
 import Link from "next/link";
 
@@ -129,15 +130,14 @@ export default function NewProductPage() {
                                     />
                                 </div>
 
-                                <div>
-                                    <Label htmlFor="hsnCode">HSN Code</Label>
-                                    <Input
-                                        id="hsnCode"
-                                        value={formData.hsnCode}
-                                        onChange={(e) => handleChange('hsnCode', e.target.value)}
-                                        placeholder="Enter HSN code"
-                                    />
-                                </div>
+                                <HSNSearch
+                                    value={formData.hsnCode}
+                                    onSelect={(hsnCode) => handleChange('hsnCode', hsnCode)}
+                                    onClear={() => handleChange('hsnCode', '')}
+                                    productType={formData.type as 'GOODS' | 'SERVICE'}
+                                    placeholder="Search HSN code or description..."
+                                    className=""
+                                />
                             </div>
 
                             {/* Pricing Information */}
