@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Footer } from "@/components/layout";
 import { Calculator, BarChart3, Users, Shield, Zap, Globe } from "lucide-react";
 
 export default function Home() {
@@ -148,11 +149,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2024 Shiv Accounts Cloud. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer variant="default" />
     </div>
   );
 }

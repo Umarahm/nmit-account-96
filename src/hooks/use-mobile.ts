@@ -1,7 +1,9 @@
 import * as React from "react"
+import { useIsMobile as useIsMobileResponsive } from "@/lib/responsive"
 
 const MOBILE_BREAKPOINT = 768
 
+// Legacy hook for backward compatibility
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
@@ -17,3 +19,6 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+
+// Recommended hook using new responsive utilities
+export const useIsMobileNew = useIsMobileResponsive;

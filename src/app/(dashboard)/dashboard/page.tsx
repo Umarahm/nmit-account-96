@@ -1,10 +1,16 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Users, FileText, BarChart3, TrendingUp, Package, ShoppingCart, CreditCard } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    DashboardPageLayout,
+    StatCard,
+    StatsGrid,
+    QuickAction
+} from "@/components/layout";
+import { DollarSign, Users, FileText, BarChart3, TrendingUp, Package, ShoppingCart, CreditCard, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -47,66 +53,52 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="space-y-8">
-            {/* Welcome Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-muted-foreground">
-                        Welcome back, {session.user?.name || session.user?.email}
-                    </p>
-                </div>
+        <DashboardPageLayout
+            title={`Welcome back, ${session.user?.name || session.user?.email || 'User'}`}
+            description="Here's an overview of your accounting dashboard"
+            actions={
                 <Badge className={getRoleColor(userRole)}>
                     {userRole}
                 </Badge>
-            </div>
-
+            }
+        >
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">₹0.00</div>
-                        <p className="text-xs text-muted-foreground">This month</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Contacts</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">0</div>
-                        <p className="text-xs text-muted-foreground">Total customers/vendors</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">0</div>
-                        <p className="text-xs text-muted-foreground">Awaiting payment</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Stock Value</CardTitle>
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">₹0.00</div>
-                        <p className="text-xs text-muted-foreground">Current inventory</p>
-                    </CardContent>
-                </Card>
-            </div>
+            <StatsGrid columns={{ sm: 1, md: 2, lg: 3, xl: 4 }}>
+                <StatCard
+                    title="Total Revenue"
+                    value="₹0.00"
+                    icon={<DollarSign className="h-4 w-4" />}
+                    description="This month"
+                    trend={{
+                        value: 0,
+                        label: "from last month",
+                        direction: "neutral"
+                    }}
+                />
+                <StatCard
+                    title="Active Contacts"
+                    value="0"
+                    icon={<Users className="h-4 w-4" />}
+                    description="Total customers/vendors"
+                />
+                <StatCard
+                    title="Pending Invoices"
+                    value="0"
+                    icon={<FileText className="h-4 w-4" />}
+                    description="Awaiting payment"
+                    trend={{
+                        value: 0,
+                        label: "from last week",
+                        direction: "neutral"
+                    }}
+                />
+                <StatCard
+                    title="Stock Value"
+                    value="₹0.00"
+                    icon={<Package className="h-4 w-4" />}
+                    description="Current inventory"
+                />
+            </StatsGrid>
 
             {/* Recent Activity & Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -146,34 +138,34 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-4">
-                            <Button asChild className="h-20 flex flex-col items-center justify-center space-y-2">
-                                <Link href="/dashboard/contacts">
-                                    <Users className="h-6 w-6" />
-                                    <span className="text-sm">Add Contact</span>
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                                <Link href="/dashboard/products">
-                                    <Package className="h-6 w-6" />
-                                    <span className="text-sm">Add Product</span>
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                                <Link href="/dashboard/sales">
-                                    <ShoppingCart className="h-6 w-6" />
-                                    <span className="text-sm">Create Sale</span>
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                                <Link href="/dashboard/reports">
-                                    <BarChart3 className="h-6 w-6" />
-                                    <span className="text-sm">View Reports</span>
-                                </Link>
-                            </Button>
+                            <QuickAction
+                                title="Add Contact"
+                                description="Customer or vendor"
+                                icon={<Users className="h-6 w-6" />}
+                                href="/dashboard/contacts/new"
+                            />
+                            <QuickAction
+                                title="Add Product"
+                                description="Inventory item"
+                                icon={<Package className="h-6 w-6" />}
+                                href="/dashboard/products/new"
+                            />
+                            <QuickAction
+                                title="Create Sale"
+                                description="New sale order"
+                                icon={<ShoppingCart className="h-6 w-6" />}
+                                href="/dashboard/sales/new"
+                            />
+                            <QuickAction
+                                title="View Reports"
+                                description="Financial insights"
+                                icon={<BarChart3 className="h-6 w-6" />}
+                                href="/dashboard/reports"
+                            />
                         </div>
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </DashboardPageLayout>
     );
 }
