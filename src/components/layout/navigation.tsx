@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 // Using custom collapsible logic instead of external component
-import { 
+import {
   Home,
   Users,
   Package,
@@ -70,21 +70,21 @@ const navigationItems: NavigationItem[] = [
   },
   {
     title: "Sales",
-    href: "/dashboard/sales",
+    href: "/dashboard/sales-orders",
     icon: ShoppingCart,
     children: [
-      { title: "Sales Orders", href: "/dashboard/sales", icon: ShoppingCart },
-      { title: "Create Sale", href: "/dashboard/sales/new", icon: Plus },
+      { title: "Sales Orders", href: "/dashboard/sales-orders", icon: ShoppingCart },
+      { title: "Create Sale", href: "/dashboard/sales-orders/new", icon: Plus },
       { title: "Quotations", href: "/dashboard/sales/quotations", icon: FileText },
     ],
   },
   {
     title: "Purchases",
-    href: "/dashboard/purchases",
+    href: "/dashboard/purchase-orders",
     icon: CreditCard,
     children: [
-      { title: "Purchase Orders", href: "/dashboard/purchases", icon: CreditCard },
-      { title: "Create Purchase", href: "/dashboard/purchases/new", icon: Plus },
+      { title: "Purchase Orders", href: "/dashboard/purchase-orders", icon: CreditCard },
+      { title: "Create Purchase", href: "/dashboard/purchase-orders/new", icon: Plus },
       { title: "Vendor Bills", href: "/dashboard/purchases/bills", icon: FileText },
     ],
   },
