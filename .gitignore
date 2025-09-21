@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# documentation
+DATABASE_SCHEMA.md
+DATABASE_SETUP.md
+HSN_IMPLEMENTATION.md
+implementation.md
+
+# project folders
+nmit_accounts/
