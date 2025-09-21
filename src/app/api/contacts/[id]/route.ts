@@ -8,7 +8,7 @@ import { authOptions } from "@/lib/auth";
 // GET /api/contacts/[id] - Get single contact
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,7 +16,8 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const contactId = parseInt(params.id);
+        const { id } = await params;
+        const contactId = parseInt(id);
         if (isNaN(contactId)) {
             return NextResponse.json(
                 { error: "Invalid contact ID" },
@@ -71,7 +72,7 @@ export async function GET(
 // PUT /api/contacts/[id] - Update contact
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -79,7 +80,8 @@ export async function PUT(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const contactId = parseInt(params.id);
+        const { id } = await params;
+        const contactId = parseInt(id);
         if (isNaN(contactId)) {
             return NextResponse.json(
                 { error: "Invalid contact ID" },
@@ -152,7 +154,7 @@ export async function PUT(
                 shippingAddress,
                 taxInfo,
                 profile,
-                creditLimit: creditLimit ? parseFloat(creditLimit) : existingContact.creditLimit,
+                creditLimit: creditLimit ? String(parseFloat(creditLimit)) : existingContact.creditLimit,
                 paymentTerms: paymentTerms ? parseInt(paymentTerms) : existingContact.paymentTerms,
                 currency: currency || existingContact.currency,
                 notes,
@@ -178,7 +180,7 @@ export async function PUT(
 // DELETE /api/contacts/[id] - Soft delete contact
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -186,7 +188,8 @@ export async function DELETE(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const contactId = parseInt(params.id);
+        const { id } = await params;
+        const contactId = parseInt(id);
         if (isNaN(contactId)) {
             return NextResponse.json(
                 { error: "Invalid contact ID" },

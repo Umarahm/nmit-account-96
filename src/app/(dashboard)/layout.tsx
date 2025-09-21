@@ -36,8 +36,47 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const handleLogout = () => {
-        signOut({ callbackUrl: "/" });
+    const handleLogout = async () => {
+        try {
+            console.log('Sidebar - Starting logout process');
+            
+            // Call our custom logout API for logging
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const result = await response.json();
+                console.log('Sidebar - Logout API response:', result);
+            } catch (apiError) {
+                console.warn('Sidebar - Logout API call failed, proceeding with NextAuth signOut:', apiError);
+            }
+            
+            // First, manually clear any client-side state
+            if (typeof window !== 'undefined') {
+                // Clear local storage if any
+                localStorage.clear();
+                sessionStorage.clear();
+                console.log('Sidebar - Cleared client-side storage');
+            }
+            
+            console.log('Sidebar - Calling NextAuth signOut');
+            // Then sign out with NextAuth
+            await signOut({ 
+                callbackUrl: "/",
+                redirect: true 
+            });
+            console.log('Sidebar - NextAuth signOut completed');
+        } catch (error) {
+            console.error('Sidebar - Logout error:', error);
+            // Force redirect to home page if signOut fails
+            if (typeof window !== 'undefined') {
+                console.log('Sidebar - Force redirecting to home page');
+                window.location.href = "/";
+            }
+        }
     };
 
     return (

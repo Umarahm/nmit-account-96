@@ -110,6 +110,41 @@ export const taxes = pgTable('taxes', {
     };
 });
 
+// Tax Settings (for advanced tax management)
+export const taxSettings = pgTable('tax_settings', {
+    id: varchar('id', { length: 50 }).primaryKey(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: text('description'),
+    rate: decimal('rate', { precision: 5, scale: 2 }).notNull(),
+    type: varchar('type', { length: 20 }).default('exclusive').notNull(), // inclusive, exclusive
+    isDefault: boolean('is_default').default(false),
+    isActive: boolean('is_active').default(true),
+    category: varchar('category', { length: 20 }).default('both').notNull(), // goods, services, both
+    hsnCodes: jsonb('hsn_codes'), // Array of applicable HSN codes
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => {
+    return {
+        nameIdx: index('tax_settings_name_idx').on(table.name),
+        isDefaultIdx: index('tax_settings_default_idx').on(table.isDefault),
+        categoryIdx: index('tax_settings_category_idx').on(table.category),
+    };
+});
+
+// Tax Configuration (global tax settings)
+export const taxConfiguration = pgTable('tax_configuration', {
+    id: varchar('id', { length: 10 }).primaryKey(),
+    enableTax: boolean('enable_tax').default(true),
+    defaultTaxRate: decimal('default_tax_rate', { precision: 5, scale: 2 }).default('18.00'),
+    taxDisplayFormat: varchar('tax_display_format', { length: 20 }).default('percentage'), // percentage, decimal
+    roundingMethod: varchar('rounding_method', { length: 10 }).default('round'), // round, floor, ceil
+    compoundTax: boolean('compound_tax').default(false),
+    taxOnShipping: boolean('tax_on_shipping').default(false),
+    pricesIncludeTax: boolean('prices_include_tax').default(false),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 // Product Categories
 export const productCategories = pgTable('product_categories', {
     id: serial('id').primaryKey(),
@@ -318,6 +353,12 @@ export type NewProduct = typeof products.$inferInsert;
 
 export type Tax = typeof taxes.$inferSelect;
 export type NewTax = typeof taxes.$inferInsert;
+
+export type TaxSetting = typeof taxSettings.$inferSelect;
+export type NewTaxSetting = typeof taxSettings.$inferInsert;
+
+export type TaxConfiguration = typeof taxConfiguration.$inferSelect;
+export type NewTaxConfiguration = typeof taxConfiguration.$inferInsert;
 
 export type ChartOfAccount = typeof chartOfAccounts.$inferSelect;
 export type NewChartOfAccount = typeof chartOfAccounts.$inferInsert;

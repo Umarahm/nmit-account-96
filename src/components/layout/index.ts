@@ -1,7 +1,7 @@
 // Layout components for Shiv Accounts Cloud
 export { Header } from "./header";
 export { Footer } from "./footer";
-export { Navigation, navigationItems } from "./navigation";
+export { Navigation, getNavigationItems } from "./navigation";
 export { 
   PageLayout, 
   DashboardPageLayout, 
