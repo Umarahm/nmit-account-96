@@ -63,6 +63,7 @@ export const authOptions: NextAuthOptions = {
     ],
     session: {
         strategy: "jwt",
+        maxAge: 24 * 60 * 60, // 24 hours
     },
     callbacks: {
         async jwt({ token, user }) {
@@ -79,8 +80,12 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
+    events: {
+        async signOut({ token }) {
+            console.log('NextAuth signOut event - User role:', token?.role);
+        },
+    },
     pages: {
         signIn: "/signin",
-        signUp: "/signup",
     },
 };

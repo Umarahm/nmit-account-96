@@ -297,7 +297,7 @@ const getNavigationItems = (): NavigationItem[] => [
       },
       {
         title: "Stock Report",
-        href: "/dashboard/reports/stock-report",
+        href: "/dashboard/reports/stock",
         icon: Package,
         permissions: ['reports:stock_report']
       },
@@ -365,8 +365,23 @@ export function Navigation({ className, isMobile = false }: NavigationProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const { hasAnyPermission, userRole } = usePermissions();
 
-  // Get navigation items and filter based on permissions
+  // Get navigation items and filter based on permissions and role
   const navigationItems = getNavigationItems().filter(item => {
+    // Hide Taxes tab for administrator role
+    if (item.title === "Taxes" && userRole === "ADMIN") {
+      return false;
+    }
+    
+    // Hide Taxes tab for accountant role
+    if (item.title === "Taxes" && userRole === "ACCOUNTANT") {
+      return false;
+    }
+    
+    // Filter out RBAC Test from Settings for administrators
+    if (item.title === "Settings" && userRole === "ADMIN" && item.children) {
+      item.children = item.children.filter(child => child.title !== "RBAC Test");
+    }
+    
     if (!item.permissions) return true;
     return hasAnyPermission(item.permissions);
   });

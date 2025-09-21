@@ -40,8 +40,47 @@ export function Header({
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/" });
+  const handleLogout = async () => {
+    try {
+      console.log('Header - Starting logout process for user:', session?.user?.email, 'Role:', session?.user?.role);
+      
+      // Call our custom logout API for logging
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const result = await response.json();
+        console.log('Header - Logout API response:', result);
+      } catch (apiError) {
+        console.warn('Header - Logout API call failed, proceeding with NextAuth signOut:', apiError);
+      }
+      
+      // First, manually clear any client-side state
+      if (typeof window !== 'undefined') {
+        // Clear local storage if any
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('Header - Cleared client-side storage');
+      }
+      
+      console.log('Header - Calling NextAuth signOut');
+      // Then sign out with NextAuth
+      await signOut({ 
+        callbackUrl: "/",
+        redirect: true 
+      });
+      console.log('Header - NextAuth signOut completed');
+    } catch (error) {
+      console.error('Header - Logout error:', error);
+      // Force redirect to home page if signOut fails
+      if (typeof window !== 'undefined') {
+        console.log('Header - Force redirecting to home page');
+        window.location.href = "/";
+      }
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {

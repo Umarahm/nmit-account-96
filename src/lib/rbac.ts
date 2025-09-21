@@ -332,7 +332,7 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
       },
       {
         title: 'Stock Report',
-        href: '/dashboard/reports/stock-report',
+        href: '/dashboard/reports/stock',
         permissions: ['reports:stock_report'],
       },
       {

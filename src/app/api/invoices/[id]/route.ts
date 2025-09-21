@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { invoices, contacts, orderItems, products, payments } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 // GET /api/invoices/[id] - Get specific invoice with items and payments
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,7 +16,8 @@ export async function GET(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const invoiceId = parseInt(params.id);
+        const { id } = await params;
+        const invoiceId = parseInt(id);
         if (isNaN(invoiceId)) {
             return NextResponse.json(
                 { error: "Invalid invoice ID" },
@@ -120,7 +121,7 @@ export async function GET(
 // PUT /api/invoices/[id] - Update invoice
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -128,7 +129,8 @@ export async function PUT(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const invoiceId = parseInt(params.id);
+        const { id } = await params;
+        const invoiceId = parseInt(id);
         if (isNaN(invoiceId)) {
             return NextResponse.json(
                 { error: "Invalid invoice ID" },
@@ -166,17 +168,21 @@ export async function PUT(
             );
         }
 
+        // Prepare update data
+        const updateData: any = {
+            updatedAt: new Date(),
+        };
+
+        if (invoiceDate) updateData.invoiceDate = new Date(invoiceDate);
+        if (dueDate) updateData.dueDate = new Date(dueDate);
+        if (status) updateData.status = status;
+        if (terms) updateData.terms = terms;
+        if (notes) updateData.notes = notes;
+
         // Update invoice
         const [updatedInvoice] = await db
             .update(invoices)
-            .set({
-                invoiceDate: invoiceDate ? new Date(invoiceDate).toISOString() : undefined,
-                dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
-                status: status || undefined,
-                terms: terms || undefined,
-                notes: notes || undefined,
-                updatedAt: new Date().toISOString(),
-            })
+            .set(updateData)
             .where(eq(invoices.id, invoiceId))
             .returning();
 
@@ -197,7 +203,7 @@ export async function PUT(
 // DELETE /api/invoices/[id] - Delete invoice (soft delete by changing status)
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -205,7 +211,8 @@ export async function DELETE(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const invoiceId = parseInt(params.id);
+        const { id } = await params;
+        const invoiceId = parseInt(id);
         if (isNaN(invoiceId)) {
             return NextResponse.json(
                 { error: "Invalid invoice ID" },
@@ -232,7 +239,7 @@ export async function DELETE(
             .from(payments)
             .where(eq(payments.invoiceId, invoiceId));
 
-        if (paymentCount.count > 0) {
+        if (Number(paymentCount.count) > 0) {
             return NextResponse.json(
                 { error: "Cannot delete invoice with existing payments" },
                 { status: 400 }
@@ -244,7 +251,7 @@ export async function DELETE(
             .update(invoices)
             .set({
                 status: 'CANCELLED',
-                updatedAt: new Date().toISOString(),
+                updatedAt: new Date(),
             })
             .where(eq(invoices.id, invoiceId))
             .returning();
