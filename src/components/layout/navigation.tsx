@@ -58,27 +58,27 @@ const getNavigationItems = (): NavigationItem[] => [
     icon: Users,
     permissions: ['contacts:view_all', 'contacts:view_own'],
     children: [
-      { 
-        title: "All Contacts", 
-        href: "/dashboard/contacts", 
+      {
+        title: "All Contacts",
+        href: "/dashboard/contacts",
         icon: Eye,
         permissions: ['contacts:view_all']
       },
-      { 
-        title: "Add Contact", 
-        href: "/dashboard/contacts/new", 
+      {
+        title: "Add Contact",
+        href: "/dashboard/contacts/new",
         icon: Plus,
         permissions: ['contacts:create']
       },
-      { 
-        title: "Customers", 
-        href: "/dashboard/contacts/customers", 
+      {
+        title: "Customers",
+        href: "/dashboard/contacts/customers",
         icon: Users,
         permissions: ['contacts:view_all']
       },
-      { 
-        title: "Vendors", 
-        href: "/dashboard/contacts/vendors", 
+      {
+        title: "Vendors",
+        href: "/dashboard/contacts/vendors",
         icon: Users,
         permissions: ['contacts:view_all']
       },
@@ -90,27 +90,27 @@ const getNavigationItems = (): NavigationItem[] => [
     icon: Package,
     permissions: ['products:view'],
     children: [
-      { 
-        title: "All Products", 
-        href: "/dashboard/products", 
+      {
+        title: "All Products",
+        href: "/dashboard/products",
         icon: Eye,
         permissions: ['products:view']
       },
-      { 
-        title: "Add Product", 
-        href: "/dashboard/products/new", 
+      {
+        title: "Add Product",
+        href: "/dashboard/products/new",
         icon: Plus,
         permissions: ['products:create']
       },
-      { 
-        title: "Categories", 
-        href: "/dashboard/products/categories", 
+      {
+        title: "Categories",
+        href: "/dashboard/products/categories",
         icon: Package,
         permissions: ['products:view']
       },
-      { 
-        title: "Stock Report", 
-        href: "/dashboard/products/stock", 
+      {
+        title: "Stock Report",
+        href: "/dashboard/products/stock",
         icon: BarChart3,
         permissions: ['reports:stock_report']
       },
@@ -122,15 +122,15 @@ const getNavigationItems = (): NavigationItem[] => [
     icon: Calculator,
     permissions: ['taxes:view'],
     children: [
-      { 
-        title: "Tax Rules", 
-        href: "/dashboard/taxes", 
+      {
+        title: "Tax Rules",
+        href: "/dashboard/taxes",
         icon: Eye,
         permissions: ['taxes:view']
       },
-      { 
-        title: "Add Tax Rule", 
-        href: "/dashboard/taxes/new", 
+      {
+        title: "Add Tax Rule",
+        href: "/dashboard/taxes/new",
         icon: Plus,
         permissions: ['taxes:create']
       },
@@ -169,15 +169,15 @@ const getNavigationItems = (): NavigationItem[] => [
         icon: CreditCard,
         permissions: ['transactions:purchase_orders:view'],
         children: [
-          { 
-            title: "All Purchase Orders", 
-            href: "/dashboard/transactions/purchase-orders", 
+          {
+            title: "All Purchase Orders",
+            href: "/dashboard/transactions/purchase-orders",
             icon: Eye,
             permissions: ['transactions:purchase_orders:view']
           },
-          { 
-            title: "Create Purchase Order", 
-            href: "/dashboard/transactions/purchase-orders/new", 
+          {
+            title: "Create Purchase Order",
+            href: "/dashboard/transactions/purchase-orders/new",
             icon: Plus,
             permissions: ['transactions:purchase_orders:create']
           },
@@ -189,21 +189,21 @@ const getNavigationItems = (): NavigationItem[] => [
         icon: Receipt,
         permissions: ['transactions:vendor_bills:view', 'transactions:vendor_bills:view_own'],
         children: [
-          { 
-            title: "All Vendor Bills", 
-            href: "/dashboard/transactions/vendor-bills", 
+          {
+            title: "All Vendor Bills",
+            href: "/dashboard/transactions/vendor-bills",
             icon: Eye,
             permissions: ['transactions:vendor_bills:view']
           },
-          { 
-            title: "My Bills", 
-            href: "/dashboard/transactions/vendor-bills/my-bills", 
+          {
+            title: "My Bills",
+            href: "/dashboard/transactions/vendor-bills/my-bills",
             icon: Eye,
             permissions: ['transactions:vendor_bills:view_own']
           },
-          { 
-            title: "Create Bill", 
-            href: "/dashboard/transactions/vendor-bills/new", 
+          {
+            title: "Create Bill",
+            href: "/dashboard/transactions/vendor-bills/new",
             icon: Plus,
             permissions: ['transactions:vendor_bills:create']
           },
@@ -215,15 +215,15 @@ const getNavigationItems = (): NavigationItem[] => [
         icon: ShoppingCart,
         permissions: ['transactions:sales_orders:view'],
         children: [
-          { 
-            title: "All Sales Orders", 
-            href: "/dashboard/transactions/sales-orders", 
+          {
+            title: "All Sales Orders",
+            href: "/dashboard/transactions/sales-orders",
             icon: Eye,
             permissions: ['transactions:sales_orders:view']
           },
-          { 
-            title: "Create Sales Order", 
-            href: "/dashboard/transactions/sales-orders/new", 
+          {
+            title: "Create Sales Order",
+            href: "/dashboard/transactions/sales-orders/new",
             icon: Plus,
             permissions: ['transactions:sales_orders:create']
           },
@@ -235,21 +235,21 @@ const getNavigationItems = (): NavigationItem[] => [
         icon: FileText,
         permissions: ['transactions:customer_invoices:view', 'transactions:customer_invoices:view_own'],
         children: [
-          { 
-            title: "All Invoices", 
-            href: "/dashboard/transactions/customer-invoices", 
+          {
+            title: "All Invoices",
+            href: "/dashboard/transactions/customer-invoices",
             icon: Eye,
             permissions: ['transactions:customer_invoices:view']
           },
-          { 
-            title: "My Invoices", 
-            href: "/dashboard/my-invoices", 
+          {
+            title: "My Invoices",
+            href: "/dashboard/my-invoices",
             icon: Eye,
             permissions: ['transactions:customer_invoices:view_own']
           },
-          { 
-            title: "Create Invoice", 
-            href: "/dashboard/transactions/customer-invoices/new", 
+          {
+            title: "Create Invoice",
+            href: "/dashboard/transactions/customer-invoices/new",
             icon: Plus,
             permissions: ['transactions:customer_invoices:create']
           },
@@ -261,21 +261,21 @@ const getNavigationItems = (): NavigationItem[] => [
         icon: DollarSign,
         permissions: ['transactions:payments:view', 'transactions:payments:view_own'],
         children: [
-          { 
-            title: "All Payments", 
-            href: "/dashboard/transactions/payments", 
+          {
+            title: "All Payments",
+            href: "/dashboard/transactions/payments",
             icon: Eye,
             permissions: ['transactions:payments:view']
           },
-          { 
-            title: "My Payments", 
-            href: "/dashboard/transactions/payments/my-payments", 
+          {
+            title: "My Payments",
+            href: "/dashboard/transactions/payments/my-payments",
             icon: Eye,
             permissions: ['transactions:payments:view_own']
           },
-          { 
-            title: "Record Payment", 
-            href: "/dashboard/transactions/payments/new", 
+          {
+            title: "Record Payment",
+            href: "/dashboard/transactions/payments/new",
             icon: Plus,
             permissions: ['transactions:payments:create']
           },
@@ -289,27 +289,21 @@ const getNavigationItems = (): NavigationItem[] => [
     icon: BarChart3,
     permissions: ['reports:view_all'],
     children: [
-      { 
-        title: "Balance Sheet", 
-        href: "/dashboard/reports/balance-sheet", 
-        icon: Calculator,
-        permissions: ['reports:balance_sheet']
-      },
-      { 
-        title: "Profit & Loss", 
-        href: "/dashboard/reports/profit-loss", 
+      {
+        title: "Profit & Loss",
+        href: "/dashboard/reports/profit-loss",
         icon: TrendingUp,
         permissions: ['reports:profit_loss']
       },
-      { 
-        title: "Stock Report", 
-        href: "/dashboard/reports/stock-report", 
+      {
+        title: "Stock Report",
+        href: "/dashboard/reports/stock-report",
         icon: Package,
         permissions: ['reports:stock_report']
       },
-      { 
-        title: "Partner Ledger", 
-        href: "/dashboard/reports/partner-ledger", 
+      {
+        title: "Partner Ledger",
+        href: "/dashboard/reports/partner-ledger",
         icon: BarChart3,
         permissions: ['reports:partner_ledger']
       },
@@ -321,39 +315,39 @@ const getNavigationItems = (): NavigationItem[] => [
     icon: Settings,
     permissions: ['settings:view', 'users:view', 'profile:view_own'],
     children: [
-      { 
-        title: "General", 
-        href: "/dashboard/settings/general", 
+      {
+        title: "General",
+        href: "/dashboard/settings/general",
         icon: Settings,
         permissions: ['settings:general']
       },
-      { 
-        title: "Tax Settings", 
-        href: "/dashboard/settings/taxes", 
+      {
+        title: "Tax Settings",
+        href: "/dashboard/settings/taxes",
         icon: Calculator,
         permissions: ['settings:view']
       },
-      { 
-        title: "Chart of Accounts", 
-        href: "/dashboard/settings/chart-of-accounts", 
+      {
+        title: "Chart of Accounts",
+        href: "/dashboard/settings/chart-of-accounts",
         icon: FileText,
         permissions: ['coa:view']
       },
-      { 
-        title: "User Management", 
-        href: "/dashboard/settings/users", 
+      {
+        title: "User Management",
+        href: "/dashboard/settings/users",
         icon: Users,
         permissions: ['users:view']
       },
-      { 
-        title: "My Profile", 
-        href: "/dashboard/profile", 
+      {
+        title: "My Profile",
+        href: "/dashboard/profile",
         icon: Users,
         permissions: ['profile:view_own']
       },
-      { 
-        title: "RBAC Test", 
-        href: "/dashboard/rbac-test", 
+      {
+        title: "RBAC Test",
+        href: "/dashboard/rbac-test",
         icon: Settings,
         permissions: ['users:view', 'settings:system_config']
       },
@@ -370,7 +364,7 @@ export function Navigation({ className, isMobile = false }: NavigationProps) {
   const pathname = usePathname();
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const { hasAnyPermission, userRole } = usePermissions();
-  
+
   // Get navigation items and filter based on permissions
   const navigationItems = getNavigationItems().filter(item => {
     if (!item.permissions) return true;
@@ -411,11 +405,11 @@ export function Navigation({ className, isMobile = false }: NavigationProps) {
     const hasActiveChildren = hasActiveChild(item);
 
     // Filter children based on permissions
-    const visibleChildren = hasChildren 
+    const visibleChildren = hasChildren
       ? item.children!.filter(child => {
-          if (!child.permissions) return true;
-          return hasAnyPermission(child.permissions);
-        })
+        if (!child.permissions) return true;
+        return hasAnyPermission(child.permissions);
+      })
       : [];
 
     // Don't show parent if no children are visible
@@ -487,7 +481,7 @@ export function Navigation({ className, isMobile = false }: NavigationProps) {
   const navigationContent = (
     <nav className="space-y-1 p-2">
       {navigationItems.map((item) => renderNavigationItem(item))}
-      
+
       {/* Show role indicator for debugging */}
       {userRole && (
         <div className="mt-4 pt-4 border-t border-gray-200">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { purchaseOrders, orderItems, contacts, products } from "@/lib/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, or, like } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
         const vendorId = searchParams.get('vendorId');
+        const search = searchParams.get('search');
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
         const offset = (page - 1) * limit;
@@ -26,6 +27,11 @@ export async function GET(request: NextRequest) {
         }
         if (vendorId) {
             whereConditions.push(eq(purchaseOrders.vendorId, parseInt(vendorId)));
+        }
+        if (search) {
+            whereConditions.push(
+                sql`${purchaseOrders.poNumber} ILIKE ${`%${search}%`} OR ${contacts.name} ILIKE ${`%${search}%`}`
+            );
         }
 
         const [orders, totalCount] = await Promise.all([
@@ -60,8 +66,8 @@ export async function GET(request: NextRequest) {
             pagination: {
                 page,
                 limit,
-                total: totalCount[0].count,
-                pages: Math.ceil(totalCount[0].count / limit)
+                total: Number(totalCount[0].count),
+                pages: Math.ceil(Number(totalCount[0].count) / limit)
             }
         });
 
@@ -136,7 +142,7 @@ export async function POST(request: NextRequest) {
             .values({
                 poNumber,
                 vendorId,
-                orderDate: new Date(orderDate).toISOString(),
+                orderDate: new Date(orderDate),
                 status: 'DRAFT',
                 totalAmount: totalAmount.toString(),
                 notes,

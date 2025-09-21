@@ -33,15 +33,6 @@ export default function ReportsPage() {
             features: ["Revenue Analysis", "Expense Tracking", "Financial Ratios", "Trend Analysis"]
         },
         {
-            title: "Balance Sheet",
-            description: "Assets, liabilities, and equity snapshot",
-            icon: <Calculator className="h-8 w-8" />,
-            href: "/dashboard/reports/balance-sheet",
-            color: "bg-green-50 border-green-200 hover:bg-green-100",
-            iconColor: "text-green-600",
-            features: ["Current Assets", "Fixed Assets", "Liabilities", "Equity Position"]
-        },
-        {
             title: "Profit & Loss Statement",
             description: "Income and expense analysis over time",
             icon: <BarChart3 className="h-8 w-8" />,
@@ -49,6 +40,15 @@ export default function ReportsPage() {
             color: "bg-purple-50 border-purple-200 hover:bg-purple-100",
             iconColor: "text-purple-600",
             features: ["Revenue Breakdown", "Cost Analysis", "Gross Profit", "Net Profit"]
+        },
+        {
+            title: "Partner Ledger",
+            description: "Detailed transaction history for customers and vendors",
+            icon: <FileText className="h-8 w-8" />,
+            href: "/dashboard/reports/partner-ledger",
+            color: "bg-green-50 border-green-200 hover:bg-green-100",
+            iconColor: "text-green-600",
+            features: ["Customer Transactions", "Vendor Payments", "Outstanding Balances", "Transaction History"]
         },
         {
             title: "Stock Report",

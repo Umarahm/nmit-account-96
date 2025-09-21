@@ -98,7 +98,7 @@ export default function Home() {
               <BarChart3 className="h-10 w-10 text-primary mb-4" />
               <CardTitle>Financial Reports</CardTitle>
               <CardDescription>
-                Generate balance sheets, profit & loss statements, and stock reports with real-time data insights.
+                Generate profit & loss statements and stock reports with real-time data insights.
               </CardDescription>
             </CardHeader>
           </Card>
