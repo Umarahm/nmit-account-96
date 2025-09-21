@@ -90,7 +90,6 @@ const navigationItems = [
         icon: BarChart3,
         description: "Financial reports",
         children: [
-            { title: "Balance Sheet", href: "/dashboard/reports/balance-sheet" },
             { title: "Profit & Loss", href: "/dashboard/reports/profit-loss" },
             { title: "Stock Statement", href: "/dashboard/reports/stock" },
         ],

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '10');
         const offset = (page - 1) * limit;
 
-        let whereConditions = [eq(contacts.isActive, true)];
+        let whereConditions: any[] = [eq(contacts.isActive, true)];
 
         if (type && type !== 'ALL') {
             whereConditions.push(
@@ -47,20 +47,10 @@ export async function GET(request: NextRequest) {
                     id: contacts.id,
                     type: contacts.type,
                     name: contacts.name,
-                    displayName: contacts.displayName,
                     email: contacts.email,
                     mobile: contacts.mobile,
-                    phone: contacts.phone,
-                    website: contacts.website,
                     address: contacts.address,
-                    billingAddress: contacts.billingAddress,
-                    shippingAddress: contacts.shippingAddress,
-                    taxInfo: contacts.taxInfo,
                     profile: contacts.profile,
-                    creditLimit: contacts.creditLimit,
-                    paymentTerms: contacts.paymentTerms,
-                    currency: contacts.currency,
-                    notes: contacts.notes,
                     isActive: contacts.isActive,
                     createdAt: contacts.createdAt,
                     updatedAt: contacts.updatedAt,
@@ -82,8 +72,8 @@ export async function GET(request: NextRequest) {
             pagination: {
                 page,
                 limit,
-                total: totalCount[0].count,
-                pages: Math.ceil(totalCount[0].count / limit)
+                total: Number(totalCount[0].count),
+                pages: Math.ceil(Number(totalCount[0].count) / limit)
             }
         });
 
@@ -108,20 +98,10 @@ export async function POST(request: NextRequest) {
         const {
             type,
             name,
-            displayName,
             email,
             mobile,
-            phone,
-            website,
             address,
-            billingAddress,
-            shippingAddress,
-            taxInfo,
-            profile,
-            creditLimit,
-            paymentTerms,
-            currency = 'INR',
-            notes
+            profile
         } = body;
 
         // Validation
@@ -161,21 +141,10 @@ export async function POST(request: NextRequest) {
             .values({
                 type,
                 name,
-                displayName,
                 email,
                 mobile,
-                phone,
-                website,
                 address,
-                billingAddress,
-                shippingAddress,
-                taxInfo,
                 profile,
-                creditLimit: creditLimit ? parseFloat(creditLimit) : null,
-                paymentTerms: paymentTerms ? parseInt(paymentTerms) : null,
-                currency,
-                notes,
-                createdBy: parseInt(session.user.id),
                 isActive: true,
             })
             .returning();

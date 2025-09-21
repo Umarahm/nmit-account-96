@@ -3,11 +3,11 @@
 
 export type UserRole = 'ADMIN' | 'ACCOUNTANT' | 'CONTACT';
 
-export type Permission = 
+export type Permission =
   // Dashboard permissions
   | 'dashboard:view_full'
   | 'dashboard:view_limited'
-  
+
   // Contact permissions
   | 'contacts:create'
   | 'contacts:edit'
@@ -15,77 +15,76 @@ export type Permission =
   | 'contacts:archive'
   | 'contacts:view_all'
   | 'contacts:view_own'
-  
+
   // Product permissions
   | 'products:create'
   | 'products:edit'
   | 'products:delete'
   | 'products:archive'
   | 'products:view'
-  
+
   // Tax permissions
   | 'taxes:create'
   | 'taxes:edit'
   | 'taxes:delete'
   | 'taxes:view'
-  
+
   // Chart of Accounts permissions
   | 'coa:create'
   | 'coa:edit'
   | 'coa:delete'
   | 'coa:view'
   | 'coa:full_control'
-  
+
   // Transaction permissions
   | 'transactions:purchase_orders:create'
   | 'transactions:purchase_orders:edit'
   | 'transactions:purchase_orders:delete'
   | 'transactions:purchase_orders:view'
-  
+
   | 'transactions:vendor_bills:create'
   | 'transactions:vendor_bills:edit'
   | 'transactions:vendor_bills:delete'
   | 'transactions:vendor_bills:view'
   | 'transactions:vendor_bills:view_own'
-  
+
   | 'transactions:sales_orders:create'
   | 'transactions:sales_orders:edit'
   | 'transactions:sales_orders:delete'
   | 'transactions:sales_orders:view'
-  
+
   | 'transactions:customer_invoices:create'
   | 'transactions:customer_invoices:edit'
   | 'transactions:customer_invoices:delete'
   | 'transactions:customer_invoices:view'
   | 'transactions:customer_invoices:view_own'
-  
+
   | 'transactions:payments:create'
   | 'transactions:payments:edit'
   | 'transactions:payments:delete'
   | 'transactions:payments:view'
   | 'transactions:payments:view_own'
   | 'transactions:payments:full_control'
-  
+
   // Report permissions
-  | 'reports:balance_sheet'
   | 'reports:profit_loss'
   | 'reports:stock_report'
   | 'reports:partner_ledger'
   | 'reports:view_all'
-  
+
   // User management permissions
   | 'users:create'
   | 'users:edit'
   | 'users:delete'
   | 'users:view'
   | 'users:assign_roles'
-  
+
   // System settings permissions
   | 'settings:system_config'
   | 'settings:archive_data'
   | 'settings:general'
   | 'settings:view'
-  
+
   // Profile permissions
   | 'profile:edit_own'
   | 'profile:view_own';
@@ -95,153 +94,151 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ADMIN: [
     // Dashboard - full KPIs overview
     'dashboard:view_full',
-    
+
     // Contacts - Full CRUD + Archive
     'contacts:create',
     'contacts:edit',
     'contacts:delete',
     'contacts:archive',
     'contacts:view_all',
-    
+
     // Products - Full CRUD
     'products:create',
     'products:edit',
     'products:delete',
     'products:archive',
     'products:view',
-    
+
     // Taxes - Full control
     'taxes:create',
     'taxes:edit',
     'taxes:delete',
     'taxes:view',
-    
+
     // Chart of Accounts - Full control
     'coa:create',
     'coa:edit',
     'coa:delete',
     'coa:view',
     'coa:full_control',
-    
+
     // Transactions - Full control
     'transactions:purchase_orders:create',
     'transactions:purchase_orders:edit',
     'transactions:purchase_orders:delete',
     'transactions:purchase_orders:view',
-    
+
     'transactions:vendor_bills:create',
     'transactions:vendor_bills:edit',
     'transactions:vendor_bills:delete',
     'transactions:vendor_bills:view',
-    
+
     'transactions:sales_orders:create',
     'transactions:sales_orders:edit',
     'transactions:sales_orders:delete',
     'transactions:sales_orders:view',
-    
+
     'transactions:customer_invoices:create',
     'transactions:customer_invoices:edit',
     'transactions:customer_invoices:delete',
     'transactions:customer_invoices:view',
-    
+
     'transactions:payments:create',
     'transactions:payments:edit',
     'transactions:payments:delete',
     'transactions:payments:view',
     'transactions:payments:full_control',
-    
+
     // Reports - All access
-    'reports:balance_sheet',
     'reports:profit_loss',
     'reports:stock_report',
     'reports:partner_ledger',
     'reports:view_all',
-    
+
     // User Management - Full control
     'users:create',
     'users:edit',
     'users:delete',
     'users:view',
     'users:assign_roles',
-    
+
     // Settings - Full control
     'settings:system_config',
     'settings:archive_data',
     'settings:general',
     'settings:view',
-    
+
     // Profile
     'profile:edit_own',
     'profile:view_own',
   ],
-  
+
   ACCOUNTANT: [
     // Dashboard - KPIs overview
     'dashboard:view_full',
-    
+
     // Contacts - Create/Edit (no delete/archive)
     'contacts:create',
     'contacts:edit',
     'contacts:view_all',
-    
+
     // Products - Create/Edit (no delete/archive)
     'products:create',
     'products:edit',
     'products:view',
-    
+
     // Taxes - Manage tax rules
     'taxes:create',
     'taxes:edit',
     'taxes:view',
-    
+
     // Chart of Accounts - Add and edit accounts
     'coa:create',
     'coa:edit',
     'coa:view',
-    
+
     // Transactions - Full operational access
     'transactions:purchase_orders:create',
     'transactions:purchase_orders:edit',
     'transactions:purchase_orders:view',
-    
+
     'transactions:vendor_bills:create',
     'transactions:vendor_bills:edit',
     'transactions:vendor_bills:view',
-    
+
     'transactions:sales_orders:create',
     'transactions:sales_orders:edit',
     'transactions:sales_orders:view',
-    
+
     'transactions:customer_invoices:create',
     'transactions:customer_invoices:edit',
     'transactions:customer_invoices:view',
-    
+
     'transactions:payments:create',
     'transactions:payments:edit',
     'transactions:payments:view',
-    
+
     // Reports - View all reports
-    'reports:balance_sheet',
     'reports:profit_loss',
     'reports:stock_report',
     'reports:partner_ledger',
     'reports:view_all',
-    
+
     // Profile
     'profile:edit_own',
     'profile:view_own',
   ],
-  
+
   CONTACT: [
     // Dashboard - Limited view (own invoices/bills status)
     'dashboard:view_limited',
-    
+
     // Own data only
     'contacts:view_own',
     'transactions:vendor_bills:view_own',
     'transactions:customer_invoices:view_own',
     'transactions:payments:view_own',
-    
+
     // Profile management
     'profile:edit_own',
     'profile:view_own',
@@ -328,11 +325,6 @@ export const NAVIGATION_CONFIG: NavigationItem[] = [
     href: '/dashboard/reports',
     permissions: ['reports:view_all'],
     children: [
-      {
-        title: 'Balance Sheet',
-        href: '/dashboard/reports/balance-sheet',
-        permissions: ['reports:balance_sheet'],
-      },
       {
         title: 'Profit & Loss',
         href: '/dashboard/reports/profit-loss',
