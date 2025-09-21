@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -232,7 +233,8 @@ export default function NewInvoicePage() {
     const totals = calculateTotals();
 
     return (
-        <div className="space-y-6">
+        <ProtectedRoute permissions={['transactions:customer_invoices:create', 'transactions:vendor_bills:create']}>
+            <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="sm" asChild>
@@ -640,5 +642,6 @@ export default function NewInvoicePage() {
                 </div>
             </form>
         </div>
+        </ProtectedRoute>
     );
 }

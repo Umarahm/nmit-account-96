@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HSNSearch } from "@/components/ui/hsn-search";
+
 import { ArrowLeft, Save, Package } from "lucide-react";
 import Link from "next/link";
 
@@ -18,7 +18,6 @@ interface Product {
     salesPrice: string | null;
     purchasePrice: string | null;
     taxPercentage: string | null;
-    hsnCode: string | null;
     category: string | null;
     isActive: boolean;
     createdAt: string;
@@ -36,7 +35,6 @@ export default function EditProductPage() {
         salesPrice: "",
         purchasePrice: "",
         taxPercentage: "",
-        hsnCode: "",
         category: ""
     });
 
@@ -54,7 +52,6 @@ export default function EditProductPage() {
                     salesPrice: data.product.salesPrice || "",
                     purchasePrice: data.product.purchasePrice || "",
                     taxPercentage: data.product.taxPercentage || "",
-                    hsnCode: data.product.hsnCode || "",
                     category: data.product.category || ""
                 });
             } catch (error) {
@@ -183,14 +180,7 @@ export default function EditProductPage() {
                                     />
                                 </div>
 
-                                <HSNSearch
-                                    value={formData.hsnCode}
-                                    onSelect={(hsnCode) => handleChange('hsnCode', hsnCode)}
-                                    onClear={() => handleChange('hsnCode', '')}
-                                    productType={formData.type as 'GOODS' | 'SERVICE'}
-                                    placeholder="Search HSN code or description..."
-                                    className=""
-                                />
+                                
                             </div>
 
                             {/* Pricing Information */}

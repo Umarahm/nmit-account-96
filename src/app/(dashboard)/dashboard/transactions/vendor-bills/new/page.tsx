@@ -100,10 +100,13 @@ export default function NewVendorBillPage() {
                 if (item.id === id) {
                     const updatedItem = { ...item, [field]: value };
 
-                    // Recalculate totals
+                    // Recalculate totals based on current product's tax rate
                     if (field === "quantity" || field === "unitPrice" || field === "discountAmount") {
+                        const product = products.find(p => p.id === item.productId);
+                        const taxPercentage = product ? parseFloat(product.taxPercentage || "0") : 0;
+                        
                         const subtotal = updatedItem.quantity * updatedItem.unitPrice;
-                        const taxAmount = (subtotal * 0.18); // 18% GST
+                        const taxAmount = (subtotal * taxPercentage) / 100;
                         const discountAmount = updatedItem.discountAmount;
                         updatedItem.taxAmount = taxAmount;
                         updatedItem.totalAmount = subtotal + taxAmount - discountAmount;
@@ -120,8 +123,26 @@ export default function NewVendorBillPage() {
         const product = products.find((p) => p.id === productId);
         if (product) {
             const unitPrice = parseFloat(product.purchasePrice || "0");
-            updateItem(itemId, "productId", productId);
-            updateItem(itemId, "unitPrice", unitPrice);
+            const taxPercentage = parseFloat(product.taxPercentage || "0");
+            
+            setItems(items.map((item) => {
+                if (item.id === itemId) {
+                    const quantity = item.quantity;
+                    const subtotal = quantity * unitPrice;
+                    const taxAmount = (subtotal * taxPercentage) / 100;
+                    const discountAmount = item.discountAmount;
+                    const totalAmount = subtotal + taxAmount - discountAmount;
+                    
+                    return {
+                        ...item,
+                        productId,
+                        unitPrice,
+                        taxAmount,
+                        totalAmount
+                    };
+                }
+                return item;
+            }));
         }
     };
 
@@ -131,6 +152,25 @@ export default function NewVendorBillPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate required fields
+        if (!contactId) {
+            alert("Please select a vendor");
+            return;
+        }
+        
+        if (items.length === 0) {
+            alert("Please add at least one item");
+            return;
+        }
+        
+        // Validate that all items have products selected
+        const invalidItems = items.filter(item => item.productId === 0);
+        if (invalidItems.length > 0) {
+            alert("Please select a product for all items");
+            return;
+        }
+        
         setLoading(true);
 
         try {
@@ -162,10 +202,12 @@ export default function NewVendorBillPage() {
                 const data = await response.json();
                 window.location.href = `/dashboard/transactions/vendor-bills/${data.invoice.id}`;
             } else {
-                console.error("Error creating vendor bill");
+                const errorData = await response.json();
+                alert(`Error creating vendor bill: ${errorData.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error("Error:", error);
+            alert("An error occurred while creating the vendor bill");
         } finally {
             setLoading(false);
         }
@@ -293,7 +335,7 @@ export default function NewVendorBillPage() {
                                             <div className="space-y-2">
                                                 <Label>Product *</Label>
                                                 <Select
-                                                    value={item.productId.toString()}
+                                                    value={item.productId === 0 ? "" : item.productId.toString()}
                                                     onValueChange={(value) => handleProductChange(item.id, parseInt(value))}
                                                 >
                                                     <SelectTrigger>

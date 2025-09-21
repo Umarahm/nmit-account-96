@@ -74,7 +74,6 @@ export async function PUT(
             salesPrice,
             purchasePrice,
             taxPercentage,
-            hsnCode,
             category
         } = body;
 
@@ -125,7 +124,6 @@ export async function PUT(
                 salesPrice: salesPrice !== undefined ? parseFloat(salesPrice) : existingProduct.salesPrice,
                 purchasePrice: purchasePrice !== undefined ? parseFloat(purchasePrice) : existingProduct.purchasePrice,
                 taxPercentage: taxPercentage !== undefined ? parseFloat(taxPercentage) : existingProduct.taxPercentage,
-                hsnCode: hsnCode !== undefined ? hsnCode : existingProduct.hsnCode,
                 category: category !== undefined ? category : existingProduct.category,
                 updatedAt: new Date().toISOString(),
             })

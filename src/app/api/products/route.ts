@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
             whereConditions.push(
                 or(
                     like(products.name, `%${search}%`),
-                    like(products.hsnCode, `%${search}%`),
                     like(products.category, `%${search}%`)
                 )
             );
@@ -50,7 +49,6 @@ export async function GET(request: NextRequest) {
                     salesPrice: products.salesPrice,
                     purchasePrice: products.purchasePrice,
                     taxPercentage: products.taxPercentage,
-                    hsnCode: products.hsnCode,
                     category: products.category,
                     isActive: products.isActive,
                     createdAt: products.createdAt,
@@ -102,7 +100,6 @@ export async function POST(request: NextRequest) {
             salesPrice,
             purchasePrice,
             taxPercentage,
-            hsnCode,
             category
         } = body;
 
@@ -144,7 +141,6 @@ export async function POST(request: NextRequest) {
                 salesPrice: salesPrice ? parseFloat(salesPrice) : null,
                 purchasePrice: purchasePrice ? parseFloat(purchasePrice) : null,
                 taxPercentage: taxPercentage ? parseFloat(taxPercentage) : null,
-                hsnCode,
                 category,
                 isActive: true,
             })
