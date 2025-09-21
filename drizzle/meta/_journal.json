@@ -22,6 +22,13 @@
       "when": 1758424171951,
       "tag": "0002_smart_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1758428894121,
+      "tag": "0003_confused_unicorn",
+      "breakpoints": true
     }
   ]
 }

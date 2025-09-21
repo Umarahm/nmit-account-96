@@ -314,7 +314,6 @@ function generateInvoiceHTML(data: InvoiceData): string {
                             <td>
                                 <strong>${item.product.name}</strong>
                                 ${item.product.sku ? `<br><small>SKU: ${item.product.sku}</small>` : ''}
-                                ${item.product.hsnCode ? `<br><small>HSN: ${item.product.hsnCode}</small>` : ''}
                             </td>
                             <td class="text-center">${item.quantity}</td>
                             <td class="text-right">${formatCurrency(parseFloat(item.unitPrice), invoice.currency)}</td>

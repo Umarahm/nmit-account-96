@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -101,10 +102,13 @@ export default function NewCustomerInvoicePage() {
                 if (item.id === id) {
                     const updatedItem = { ...item, [field]: value };
 
-                    // Recalculate totals
+                    // Recalculate totals based on current product's tax rate
                     if (field === "quantity" || field === "unitPrice" || field === "discountAmount") {
+                        const product = products.find(p => p.id === item.productId);
+                        const taxPercentage = product ? parseFloat(product.taxPercentage || "0") : 0;
+                        
                         const subtotal = updatedItem.quantity * updatedItem.unitPrice;
-                        const taxAmount = (subtotal * 0.18); // 18% GST
+                        const taxAmount = (subtotal * taxPercentage) / 100;
                         const discountAmount = updatedItem.discountAmount;
                         updatedItem.taxAmount = taxAmount;
                         updatedItem.totalAmount = subtotal + taxAmount - discountAmount;
@@ -121,8 +125,26 @@ export default function NewCustomerInvoicePage() {
         const product = products.find((p) => p.id === productId);
         if (product) {
             const unitPrice = parseFloat(product.salesPrice || "0");
-            updateItem(itemId, "productId", productId);
-            updateItem(itemId, "unitPrice", unitPrice);
+            const taxPercentage = parseFloat(product.taxPercentage || "0");
+            
+            setItems(items.map((item) => {
+                if (item.id === itemId) {
+                    const quantity = item.quantity;
+                    const subtotal = quantity * unitPrice;
+                    const taxAmount = (subtotal * taxPercentage) / 100;
+                    const discountAmount = item.discountAmount;
+                    const totalAmount = subtotal + taxAmount - discountAmount;
+                    
+                    return {
+                        ...item,
+                        productId,
+                        unitPrice,
+                        taxAmount,
+                        totalAmount
+                    };
+                }
+                return item;
+            }));
         }
     };
 
@@ -132,6 +154,25 @@ export default function NewCustomerInvoicePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validate required fields
+        if (!contactId) {
+            alert("Please select a customer");
+            return;
+        }
+        
+        if (items.length === 0) {
+            alert("Please add at least one item");
+            return;
+        }
+        
+        // Validate that all items have products selected
+        const invalidItems = items.filter(item => item.productId === 0);
+        if (invalidItems.length > 0) {
+            alert("Please select a product for all items");
+            return;
+        }
+        
         setLoading(true);
 
         try {
@@ -163,17 +204,20 @@ export default function NewCustomerInvoicePage() {
                 const data = await response.json();
                 window.location.href = `/dashboard/transactions/customer-invoices/${data.invoice.id}`;
             } else {
-                console.error("Error creating invoice");
+                const errorData = await response.json();
+                alert(`Error creating invoice: ${errorData.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error("Error:", error);
+            alert("An error occurred while creating the invoice");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="space-y-6">
+        <ProtectedRoute permissions={['transactions:customer_invoices:create']}>
+            <div className="space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="outline" asChild>
                     <Link href="/dashboard/transactions/customer-invoices">
@@ -286,11 +330,11 @@ export default function NewCustomerInvoicePage() {
                                             </Button>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                             <div className="space-y-2">
                                                 <Label>Product *</Label>
                                                 <Select
-                                                    value={item.productId.toString()}
+                                                    value={item.productId === 0 ? "" : item.productId.toString()}
                                                     onValueChange={(value) => handleProductChange(item.id, parseInt(value))}
                                                 >
                                                     <SelectTrigger>
@@ -325,6 +369,27 @@ export default function NewCustomerInvoicePage() {
                                                     step="0.01"
                                                     value={item.unitPrice}
                                                     onChange={(e) => updateItem(item.id, "unitPrice", parseFloat(e.target.value) || 0)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>Tax (%)</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={(() => {
+                                                        const product = products.find(p => p.id === item.productId);
+                                                        const subtotal = item.quantity * item.unitPrice;
+                                                        return subtotal > 0 ? ((item.taxAmount / subtotal) * 100).toFixed(2) : "0";
+                                                    })()}
+                                                    onChange={(e) => {
+                                                        const taxPercentage = parseFloat(e.target.value) || 0;
+                                                        const subtotal = item.quantity * item.unitPrice;
+                                                        const taxAmount = (subtotal * taxPercentage) / 100;
+                                                        const totalAmount = subtotal + taxAmount - item.discountAmount;
+                                                        setItems(items.map(i => i.id === item.id ? { ...i, taxAmount, totalAmount } : i));
+                                                    }}
                                                 />
                                             </div>
 
@@ -378,6 +443,7 @@ export default function NewCustomerInvoicePage() {
                 </div>
             </form>
         </div>
+        </ProtectedRoute>
     );
 }
 

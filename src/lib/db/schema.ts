@@ -64,8 +64,7 @@ export const products = pgTable('products', {
     purchasePrice: decimal('purchase_price', { precision: 10, scale: 2 }),
     costPrice: decimal('cost_price', { precision: 10, scale: 2 }),
     taxPercentage: decimal('tax_percentage', { precision: 5, scale: 2 }),
-    hsnCode: varchar('hsn_code', { length: 20 }),
-    sacCode: varchar('sac_code', { length: 20 }), // For services
+
     category: varchar('category', { length: 100 }),
     brand: varchar('brand', { length: 100 }),
     unit: varchar('unit', { length: 20 }).default('PCS'), // Units of measurement
@@ -84,7 +83,7 @@ export const products = pgTable('products', {
     return {
         skuIdx: index('products_sku_idx').on(table.sku),
         nameIdx: index('products_name_idx').on(table.name),
-        hsnIdx: index('products_hsn_idx').on(table.hsnCode),
+
         categoryIdx: index('products_category_idx').on(table.category),
         typeIdx: index('products_type_idx').on(table.type),
     };
@@ -120,7 +119,7 @@ export const taxSettings = pgTable('tax_settings', {
     isDefault: boolean('is_default').default(false),
     isActive: boolean('is_active').default(true),
     category: varchar('category', { length: 20 }).default('both').notNull(), // goods, services, both
-    hsnCodes: jsonb('hsn_codes'), // Array of applicable HSN codes
+
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 }, (table) => {

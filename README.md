@@ -1,3 +1,7 @@
+Video link : https://drive.google.com/file/d/1HnxPXo0nxZPzmjx3GxPF8D0hdSWh-2Z1/view?usp=sharing
+
+
+
 # Shiv Accounts Cloud - Modular Manufacturing Management Platform
 
 A cloud-based accounting system for manufacturing businesses with modular architecture, HSN code integration, and comprehensive financial management capabilities.
